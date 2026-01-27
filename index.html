@@ -1,0 +1,2458 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Magic Eye Generator - Stereogram Creator</title>
+        <link rel="shortcut icon" href="favicon.svg" type="image/svg+xml">
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            /* width */
+            ::-webkit-scrollbar {
+                width: 10px;
+            }
+
+            /* Track */
+            ::-webkit-scrollbar-track {
+                background: #a0a0c0;
+            }
+
+            /* Handle */
+            ::-webkit-scrollbar-thumb {
+                background: #2d4263;
+            }
+
+            /* Handle on hover */
+            ::-webkit-scrollbar-thumb:hover {
+                background: #1c2b41;
+            }
+
+
+            body {
+                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                color: #e6e6e6;
+                min-height: 100vh;
+                padding: 20px;
+            }
+
+            .header {
+                text-align: center;
+                margin-bottom: 30px;
+                padding-bottom: 20px;
+                border-bottom: 2px solid #2d4263;
+            }
+
+            .header h1 {
+                font-size: 2.8rem;
+                margin-bottom: 8px;
+                background: linear-gradient(to right, #ff7e5f, #feb47b);
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .header p {
+                font-size: 1.1rem;
+                color: #a0a0c0;
+                max-width: 800px;
+                margin: 0 auto;
+                line-height: 1.6;
+            }
+
+            .app-container {
+                display: grid;
+                grid-template-columns: 350px 1fr 350px;
+                gap: 20px;
+                max-width: 2000px;
+                margin: 0 auto 50px;
+            }
+
+            .panel {
+                background: rgba(30, 30, 46, 0.85);
+                border-radius: 12px;
+                padding: 20px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+                border: 1px solid #2d4263;
+                height: fit-content;
+            }
+
+            .panel-title {
+                font-size: 1.4rem;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #2d4263;
+                color: #feb47b;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .panel-title::before {
+                content: '';
+                display: block;
+                width: 4px;
+                height: 24px;
+                background: #ff7e5f;
+                border-radius: 4px;
+            }
+
+            .preview-panel {
+                grid-column: 2;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .canvas-container {
+                width: 100%;
+                background: #0f1525;
+                border-radius: 8px;
+                /* padding: 15px; */
+                margin-bottom: 20px;
+                border: 1px solid #2d4263;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                overflow: hidden;
+            }
+
+            canvas {
+                display: block;
+                background: #1a1a2e;
+                border-radius: 4px;
+                max-width: 100%;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            }
+
+            .canvas-container canvas {
+                max-width: 100%;
+                height: auto;
+                object-fit: contain;
+            }
+
+            .depth-canvas {
+                border: 2px solid #2d4263;
+            }
+
+            .stereogram-canvas {
+                border: 2px solid #ff7e5f;
+            }
+
+            .canvas-tabs {
+                display: flex;
+                width: 100%;
+                margin-bottom: 15px;
+                background: #1a1a2e;
+                border-radius: 8px;
+                overflow: hidden;
+                border: 1px solid #2d4263;
+            }
+
+            .tab-btn {
+                flex: 1;
+                padding: 12px;
+                background: transparent;
+                border: none;
+                color: #a0a0c0;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            .tab-btn.active {
+                background: #2d4263;
+                color: #feb47b;
+            }
+
+            .canvas-label {
+                font-size: 1.1rem;
+                margin-top: 15px;
+                margin-bottom: 10px;
+                color: #a0a0c0;
+                text-align: center;
+            }
+
+            .control-group {
+                margin-bottom: 25px;
+            }
+
+            .control-label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #d0d0e0;
+            }
+
+            .slider-container {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            input[type="range"] {
+                flex: 1;
+                height: 8px;
+                appearance: none;
+                -webkit-appearance: none;
+                background: #2d4263;
+                border-radius: 4px;
+                outline: none;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                appearance: none;
+                -webkit-appearance: none;
+                width: 20px;
+                height: 20px;
+                background: #ff7e5f;
+                border-radius: 50%;
+                cursor: pointer;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            }
+
+            .value-display {
+                min-width: 40px;
+                text-align: center;
+                font-weight: 600;
+                color: #feb47b;
+                background: rgba(45, 66, 99, 0.5);
+                padding: 4px 8px;
+                border-radius: 4px;
+            }
+
+            select,
+            button,
+            input[type="file"] {
+                width: 100%;
+                padding: 12px 15px;
+                background: #2d4263;
+                color: #e6e6e6;
+                border: 1px solid #3a506b;
+                border-radius: 8px;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            select:hover,
+            button:hover:not(:disabled) {
+                background: #3a506b;
+                border-color: #ff7e5f;
+            }
+
+            button:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .btn-primary {
+                background: linear-gradient(to right, #ff7e5f, #feb47b);
+                color: #1a1a2e;
+                font-weight: 700;
+                border: none;
+            }
+
+            .btn-secondary {
+                background: transparent;
+                border: 2px solid #ff7e5f;
+                color: #ff7e5f;
+                font-weight: 700;
+            }
+
+            .btn-icon {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .btn-icon svg {
+                width: 18px;
+                height: 18px;
+                fill: currentColor;
+            }
+
+            .source-options {
+                display: none;
+                margin-top: 15px;
+                padding: 15px;
+                background: rgba(26, 26, 46, 0.7);
+                border-radius: 8px;
+                border-left: 4px solid #ff7e5f;
+            }
+
+            .source-options.active {
+                display: block;
+                animation: fadeIn 0.3s;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                }
+
+                to {
+                    opacity: 1;
+                }
+            }
+
+            .upload-area {
+                border: 2px dashed #3a506b;
+                border-radius: 8px;
+                padding: 30px;
+                text-align: center;
+                margin-bottom: 15px;
+                cursor: pointer;
+                transition: all 0.3s;
+                display: block;
+                position: relative;
+            }
+
+            .upload-area:hover {
+                border-color: #ff7e5f;
+                background: rgba(255, 126, 95, 0.05);
+            }
+
+            .upload-area input {
+                position: absolute;
+                inset: 0;
+                opacity: 0;
+            }
+
+            .upload-icon {
+                font-size: 3rem;
+                color: #3a506b;
+                margin-bottom: 10px;
+            }
+
+            .paint-controls {
+                /* display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px; */
+                margin-top: 15px;
+            }
+
+            .color-picker {
+                width: 100%;
+                height: 40px;
+                border-radius: 8px;
+                border: 2px solid #3a506b;
+                cursor: pointer;
+                background: #1a1a2e;
+            }
+
+            .layer-item {
+                background: rgba(26, 26, 46, 0.7);
+                border-radius: 8px;
+                padding: 15px;
+                margin-bottom: 10px;
+                border: 1px solid #2d4263;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .layer-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .layer-name {
+                font-weight: 600;
+                color: #d0d0e0;
+            }
+
+            .layer-controls {
+                display: flex;
+                gap: 8px;
+            }
+
+            .layer-btn {
+                background: transparent;
+                border: none;
+                color: #a0a0c0;
+                cursor: pointer;
+                padding: 4px;
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .layer-btn:hover {
+                background: #2d4263;
+                color: #feb47b;
+            }
+
+            .layer-btn svg {
+                width: 16px;
+                height: 16px;
+            }
+
+            .layer-visibility.active {
+                color: #4CAF50;
+            }
+
+            .layer-remove {
+                color: #ff5252;
+            }
+
+            .layer-drag {
+                cursor: move;
+            }
+
+            .action-buttons {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+                margin-top: 25px;
+            }
+
+            .divider {
+                height: 1px;
+                background: #2d4263;
+                margin: 20px 0;
+            }
+
+            .preset-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-top: 15px;
+            }
+
+            .preset-btn {
+                padding: 12px;
+                background: #2d4263;
+                border: 1px solid #3a506b;
+                border-radius: 8px;
+                color: #e6e6e6;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            .preset-btn:hover {
+                background: #3a506b;
+                border-color: #ff7e5f;
+                transform: translateY(-2px);
+            }
+
+            .status-bar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(26, 26, 46, 0.95);
+                padding: 12px 20px;
+                border-top: 1px solid #2d4263;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 0.9rem;
+                color: #a0a0c0;
+                z-index: 100;
+            }
+
+            .status-message {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .loading-spinner {
+                width: 16px;
+                height: 16px;
+                border: 2px solid #2d4263;
+                border-top: 2px solid #ff7e5f;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                display: none;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .loading-spinner.active {
+                display: block;
+            }
+
+            @media (max-width: 1400px) {
+                .app-container {
+                    grid-template-columns: 1fr;
+                    grid-template-rows: auto auto auto;
+                }
+
+                .preview-panel {
+                    grid-column: 1;
+                    order: 2;
+                }
+
+                .depth-panel {
+                    order: 1;
+                }
+
+                .control-panel {
+                    order: 3;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .app-container {
+                    grid-template-columns: 1fr;
+                }
+
+                .paint-controls {
+                    grid-template-columns: 1fr;
+                }
+
+                .action-buttons {
+                    grid-template-columns: 1fr;
+                }
+
+                .preset-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .tip {
+                font-size: 0.9rem;
+                color: #8a8ab5;
+                font-style: italic;
+                margin-top: 5px;
+            }
+
+            .layer-btn svg {
+                fill: #ff7e5f;
+            }
+
+            [draggable="true"] {
+                cursor: move;
+            }
+
+            .preset-images-grid {
+                display: grid;
+                /* grid-template-columns: repeat(3, 1fr); */
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 10px;
+                margin-top: 10px;
+                width: 100%;
+                /* اضافه کنید */
+            }
+
+            .preset-image-item {
+                background: rgba(45, 66, 99, 0.5);
+                border-radius: 8px;
+                padding: 10px;
+                cursor: pointer;
+                transition: all 0.3s;
+                border: 2px solid transparent;
+                text-align: center;
+                min-width: 0;
+                /* مهم: جلوگیری از overflow */
+            }
+
+            .preset-image-item:hover {
+                background: rgba(45, 66, 99, 0.8);
+                border-color: #ff7e5f;
+                transform: translateY(-2px);
+            }
+
+            .preset-image-preview {
+                width: 100%;
+                height: 80px;
+                background: #1a1a2e;
+                border-radius: 4px;
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #a0a0c0;
+                font-size: 2rem;
+            }
+
+            .preset-image-name {
+                font-size: 0.9rem;
+                color: #e6e6e6;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                max-width: 100%;
+                /* محدود کردن عرض */
+            }
+
+            @media (max-width: 768px) {
+                .preset-images-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+
+            .panel.depth-panel,
+            .panel.control-panel {
+                max-height: 90vh;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+
+            .preset-image-item .preset-image-preview {
+                background-size: contain;
+                background-position: center;
+                background-repeat: no-repeat;
+            }
+
+            .preset-image-item[data-filename*="texture"] .preset-image-preview {
+                background-size: cover;
+            }
+
+            .preset-image-item[data-filename="depth1.png"] .preset-image-preview {
+                background-image: url('presets/depth/depth1.png');
+            }
+
+            .preset-image-item[data-filename="depth2.png"] .preset-image-preview {
+                background-image: url('presets/depth/depth2.png');
+            }
+
+            .preset-image-item[data-filename="depth3.png"] .preset-image-preview {
+                background-image: url('presets/depth/depth3.png');
+            }
+
+            .preset-image-item[data-filename="depth4.png"] .preset-image-preview {
+                background-image: url('presets/depth/depth4.png');
+            }
+
+            .preset-image-item[data-filename="texture1.jpg"] .preset-image-preview {
+                background-image: url('presets/texture/texture1.jpg');
+            }
+
+            .preset-image-item[data-filename="texture2.jpg"] .preset-image-preview {
+                background-image: url('presets/texture/texture2.jpg');
+            }
+
+            .preset-image-item[data-filename="texture3.jpg"] .preset-image-preview {
+                background-image: url('presets/texture/texture3.jpg');
+            }
+
+            .preset-image-item[data-filename="texture4.jpg"] .preset-image-preview {
+                background-image: url('presets/texture/texture4.jpg');
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="header">
+            <h1>Magic Eye Generator</h1>
+            <p>Create your own autostereogram (Magic Eye) images. Upload or paint a depth map, customize the pattern, and generate 3D illusions.</p>
+        </div>
+
+        <div class="app-container">
+            <!-- Depth Sources Panel -->
+            <div class="panel depth-panel">
+                <div class="panel-title">Depth Sources & Layers</div>
+
+                <div class="control-group">
+                    <label class="control-label">Depth Source Type</label>
+                    <select id="depthSourceType">
+                        <option value="image">Image Upload</option>
+                        <option value="preset" selected>Preset Depth Map</option>
+                        <option value="paint">Paint Depth Map</option>
+                        <option value="text">Text Depth Map</option>
+                    </select>
+                </div>
+
+                <!-- Image Upload Options -->
+                <div id="imageOptions" class="source-options active">
+                    <label class="upload-area" id="imageUploadArea" for="imageUpload">
+                        <div class="upload-icon">📁</div>
+                        <p>Click to upload or drag & drop</p>
+                        <p class="tip">PNG, JPG up to 5MB</p>
+                        <input type="file" id="imageUpload" accept=".jpg,.jpeg,.png" style="display: non;">
+                    </label>
+
+                    <div class="control-group" style="display: none;">
+                        <label class="control-label">Invert Depth</label>
+                        <div class="slider-container">
+                            <input type="range" id="invertDepth" min="0" max="1" step="1" value="0">
+                            <div class="value-display" id="invertDepthValue">No</div>
+                        </div>
+                    </div>
+
+                    <div class="control-group" style="display: none;">
+                        <label class="control-label">Blur Strength</label>
+                        <div class="slider-container">
+                            <input type="range" id="blurStrength" min="0" max="10" step="1" value="0">
+                            <div class="value-display" id="blurStrengthValue">0</div>
+                        </div>
+                    </div>
+
+
+                    <div class="control-group" id="depthImagePresets">
+                        <label class="control-label">Depth Image Presets</label>
+                        <div class="preset-images-grid">
+                            <div class="preset-image-item" data-filename="depth1.png">
+                                <div class="preset-image-preview"></div>
+                                <div class="preset-image-name">Depth Map 1</div>
+                            </div>
+                            <div class="preset-image-item" data-filename="depth2.png">
+                                <div class="preset-image-preview"></div>
+                                <div class="preset-image-name">Depth Map 2</div>
+                            </div>
+                            <div class="preset-image-item" data-filename="depth3.png">
+                                <div class="preset-image-preview"></div>
+                                <div class="preset-image-name">Depth Map 3</div>
+                            </div>
+                            <div class="preset-image-item" data-filename="depth4.png">
+                                <div class="preset-image-preview"></div>
+                                <div class="preset-image-name">Depth Map 4</div>
+                            </div>
+                            <!-- Add more as needed -->
+                        </div>
+                    </div>
+
+                    <button id="addImageLayer" class="btn-primary btn-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                        </svg>
+                        Add as Layer
+                    </button>
+                </div>
+
+                <!-- Preset Options -->
+                <div id="presetOptions" class="source-options">
+                    <div class="control-group">
+                        <label class="control-label">Select Preset</label>
+                        <div class="preset-grid">
+                            <button class="preset-btn" data-preset="waves">🌊 Waves</button>
+                            <button class="preset-btn" data-preset="radial">◎ Radial</button>
+                            <button class="preset-btn" data-preset="steps">📶 Steps</button>
+                            <button class="preset-btn" data-preset="pyramid">🔺 Pyramid</button>
+                            <button class="preset-btn" data-preset="sphere">⚪ Sphere</button>
+                            <button class="preset-btn" data-preset="valley">🏞️ Valley</button>
+                        </div>
+                    </div>
+
+                    <button id="addPresetLayer" class="btn-primary btn-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                        </svg>
+                        Add as Layer
+                    </button>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Invert Shape</label>
+                    <div class="slider-container">
+                        <input type="range" id="presetInvert" min="0" max="1" step="1" value="0">
+                        <div class="value-display" id="presetInvertValue">No</div>
+                    </div>
+                </div>
+
+                <!-- Paint Options -->
+                <div id="paintOptions" class="source-options">
+                    <div class="canvas-container" style="height: 200px;">
+                        <canvas id="paintCanvas" width="300" height="200"></canvas>
+                    </div>
+
+                    <div class="paint-controls">
+                        <div class="control-group">
+                            <label class="control-label">Brush Size</label>
+                            <div class="slider-container">
+                                <input type="range" id="brushSize" min="1" max="50" value="10">
+                                <div class="value-display" id="brushSizeValue">10</div>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label class="control-label">Brush Value</label>
+                            <div class="slider-container">
+                                <input type="range" id="brushValue" min="0" max="255" value="128">
+                                <div class="value-display" id="brushValueValue">128</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Brush Mode</label>
+                        <select id="brushMode">
+                            <option value="draw">Draw</option>
+                            <option value="erase">Erase</option>
+                        </select>
+                    </div>
+
+                    <button id="addPaintLayer" class="btn-primary btn-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                        </svg>
+                        Add as Layer
+                    </button>
+                </div>
+
+                <!-- Text Options -->
+                <div id="textOptions" class="source-options">
+                    <div class="control-group">
+                        <label class="control-label">Text Content</label>
+                        <textarea id="textContent" rows="3" placeholder="Enter text here...">3D</textarea>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Font Size</label>
+                        <div class="slider-container">
+                            <input type="range" id="fontSize" min="20" max="500" value="100">
+                            <div class="value-display" id="fontSizeValue">48</div>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Depth Value</label>
+                        <div class="slider-container">
+                            <input type="range" id="textDepth" min="0" max="255" value="200">
+                            <div class="value-display" id="textDepthValue">200</div>
+                        </div>
+                    </div>
+
+                    <button id="addTextLayer" class="btn-primary btn-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                        </svg>
+                        Add as Layer
+                    </button>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Layers List -->
+                <div class="control-group">
+                    <label class="control-label">Depth Layers</label>
+                    <div id="layersList">
+                        <div class="layer-item">
+                            <div class="layer-header">
+                                <span class="layer-name">Base Layer</span>
+                                <div class="layer-controls">
+                                    <button class="layer-btn layer-visibility active" title="Toggle visibility">
+                                        <svg viewBox="0 0 24 24">
+                                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="slider-container">
+                                <input type="range" class="layer-opacity" min="0" max="1" step="0.1" value="1">
+                                <div class="value-display layer-opacity-value">1.0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="clearLayers" class="btn-secondary" style="margin-top: 10px;">
+                        Clear All Layers
+                    </button>
+                </div>
+            </div>
+
+            <!-- Preview Panel -->
+            <div class="panel preview-panel">
+                <div class="canvas-tabs">
+                    <button class="tab-btn active" data-tab="depth">Depth Map</button>
+                    <button class="tab-btn" data-tab="stereogram">Stereogram</button>
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="depthCanvas" class="depth-canvas" width="800" height="600"></canvas>
+                    <canvas id="stereogramCanvas" class="stereogram-canvas" width="800" height="600" style="display: none;"></canvas>
+                </div>
+
+                <div class="canvas-label" id="canvasLabel">Depth Map Preview</div>
+
+                <div class="action-buttons">
+                    <button id="generateBtn" class="btn-primary btn-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M9 12l-4.463 4.969-4.537-4.969h3c0-4.97 4.03-9 9-9 2.395 0 4.565.942 6.179 2.468l-2.004 2.231c-1.081-1.05-2.553-1.699-4.175-1.699-3.309 0-6 2.691-6 6h3z" />
+                            <path d="M20.463 7.031l-4.463 4.969h3c0 3.309-2.691 6-6 6-1.622 0-3.094-.649-4.175-1.699l-2.004 2.231c1.614 1.526 3.784 2.468 6.179 2.468 4.97 0 9-4.03 9-9h3l-4.537-4.969z" />
+                        </svg>
+                        Generate Stereogram
+                    </button>
+                    <button id="downloadBtn" class="btn-secondary btn-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                        </svg>
+                        Download PNG
+                    </button>
+                </div>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="panel control-panel">
+                <div class="panel-title">Texture & Perception</div>
+
+                <div class="control-group">
+                    <label class="control-label">Texture Type</label>
+                    <select id="textureType">
+                        <option value="randomTexture">Random Dots</option>
+                        <option value="imageTexture">Image Texture</option>
+                    </select>
+                </div>
+
+                <!-- Random Dots Options -->
+                <div id="randomTextureOptions" class="source-options active">
+                    <div class="control-group">
+                        <label class="control-label">Dot Size</label>
+                        <div class="slider-container">
+                            <input type="range" id="dotSize" min="1" max="10" value="3">
+                            <div class="value-display" id="dotSizeValue">3</div>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Dot Density</label>
+                        <div class="slider-container">
+                            <input type="range" id="dotDensity" min="1" max="100" value="50">
+                            <div class="value-display" id="dotDensityValue">50%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Texture Options -->
+                <div id="imageTextureOptions" class="source-options">
+                    <div class="upload-area" id="textureUploadArea">
+                        <div class="upload-icon">🖼️</div>
+                        <p>Upload Texture Image</p>
+                        <p class="tip">Will be repeated as pattern</p>
+                        <input type="file" id="textureUpload" accept=".jpg,.jpeg,.png">
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Pattern Scale</label>
+                        <div class="slider-container">
+                            <input type="range" id="patternScale" min="10" max="200" value="100">
+                            <div class="value-display" id="patternScaleValue">100%</div>
+                        </div>
+                    </div>
+
+                    <div class="control-group" id="textureImagePresets">
+                        <label class="control-label">Texture Image Presets</label>
+                        <div class="preset-images-grid">
+                            <div class="preset-image-item" data-filename="texture1.jpg">
+                                <div class="preset-image-preview"></div>
+                                <div class="preset-image-name">Texture 1</div>
+                            </div>
+                            <div class="preset-image-item" data-filename="texture2.jpg">
+                                <div class="preset-image-preview"></div>
+                                <div class="preset-image-name">Texture 2</div>
+                            </div>
+                            <div class="preset-image-item" data-filename="texture3.jpg">
+                                <div class="preset-image-preview"></div>
+                                <div class="preset-image-name">Texture 3</div>
+                            </div>
+                            <div class="preset-image-item" data-filename="texture4.jpg">
+                                <div class="preset-image-preview"></div>
+                                <div class="preset-image-name">Texture 4</div>
+                            </div>
+                            <!-- Add more as needed -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="control-group">
+                    <label class="control-label">Depth Strength</label>
+                    <div class="slider-container">
+                        <input type="range" id="depthStrength" min="1" max="100" value="30">
+                        <div class="value-display" id="depthStrengthValue">30</div>
+                    </div>
+                    <p class="tip">Controls how much 3D effect is applied</p>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Pattern Width</label>
+                    <div class="slider-container">
+                        <input type="range" id="patternWidth" min="50" max="300" value="120">
+                        <div class="value-display" id="patternWidthValue">120</div>
+                    </div>
+                    <p class="tip">Width of repeating pattern in pixels</p>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Eye Separation</label>
+                    <div class="slider-container">
+                        <input type="range" id="eyeSeparation" min="1" max="100" value="65">
+                        <div class="value-display" id="eyeSeparationValue">65%</div>
+                    </div>
+                    <p class="tip">Distance between virtual eyes</p>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Comfort Mode</label>
+                    <div class="slider-container">
+                        <input type="range" id="comfortMode" min="0" max="1" step="1" value="1">
+                        <div class="value-display" id="comfortModeValue">On</div>
+                    </div>
+                    <p class="tip">Reduces extreme depth shifts</p>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="control-group">
+                    <label class="control-label">Output Size</label>
+                    <select id="outputSize">
+                        <option value="640x480">640 × 480</option>
+                        <option value="800x600" selected>800 × 600</option>
+                        <option value="1024x768">1024 × 768</option>
+                        <option value="1280x720">1280 × 720</option>
+                        <option value="1920x1080">1920 × 1080</option>
+                    </select>
+                </div>
+
+                <button id="resetBtn" class="btn-secondary btn-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                    </svg>
+                    Reset All
+                </button>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-message">
+                <span id="statusText">Ready to create stereogram</span>
+                <div class="loading-spinner" id="loadingSpinner"></div>
+            </div>
+            <div id="layerCount">Layers: 1</div>
+        </div>
+
+        <script>
+            // Main application class
+            class StereogramGenerator {
+                constructor() {
+                    this.canvas = {
+                        depth: document.getElementById('depthCanvas'),
+                        stereogram: document.getElementById('stereogramCanvas'),
+                        paint: document.getElementById('paintCanvas')
+                    };
+
+                    this.ctx = {
+                        depth: this.canvas.depth.getContext('2d'),
+                        stereogram: this.canvas.stereogram.getContext('2d'),
+                        paint: this.canvas.paint.getContext('2d')
+                    };
+
+                    // Depth layers
+                    this.layers = [];
+                    this.currentDepthMap = null;
+
+                    // Paint state
+                    this.isPainting = false;
+                    this.paintData = null;
+
+                    // Texture data
+                    this.textureImage = null;
+                    this.textureData = null;
+
+                    // Preset images base path
+                    this.presetImagePath = 'presets/'; // Change this to your actual path
+
+                    // Initialize
+                    this.init();
+                }
+
+                init() {
+                    this.setupEventListeners();
+                    this.setupPaintCanvas();
+                    this.addBaseLayer();
+                    this.updateDepthMap();
+                    this.updateStatus('Ready to create stereogram');
+                }
+
+                setupEventListeners() {
+                    // Depth source type change
+                    document.getElementById('depthSourceType').addEventListener('change', (e) => {
+                        this.showSourceOptions(e.target.value);
+                    });
+
+                    // Image upload
+                    const imageUpload = document.getElementById('imageUpload');
+                    const imageUploadArea = document.getElementById('imageUploadArea');
+
+                    // imageUploadArea.addEventListener('click', () => imageUpload.click());
+                    imageUpload.addEventListener('change', (e) => this.handleImageUpload(e));
+
+                    // Add image layer button
+                    document.getElementById('addImageLayer').addEventListener('click', () => this.addImageLayer());
+
+                    // Preset buttons
+                    document.querySelectorAll('.preset-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const preset = e.target.dataset.preset;
+                            this.selectPreset(preset);
+                        });
+                    });
+
+                    // Add preset layer button
+                    document.getElementById('addPresetLayer').addEventListener('click', () => this.addPresetLayer());
+
+                    // Paint controls
+                    document.getElementById('brushSize').addEventListener('input', (e) => {
+                        document.getElementById('brushSizeValue').textContent = e.target.value;
+                    });
+
+                    document.getElementById('brushValue').addEventListener('input', (e) => {
+                        document.getElementById('brushValueValue').textContent = e.target.value;
+                    });
+
+                    // Add paint layer button
+                    document.getElementById('addPaintLayer').addEventListener('click', () => this.addPaintLayer());
+
+                    // Text controls
+                    document.getElementById('fontSize').addEventListener('input', (e) => {
+                        document.getElementById('fontSizeValue').textContent = e.target.value;
+                    });
+
+                    document.getElementById('textDepth').addEventListener('input', (e) => {
+                        document.getElementById('textDepthValue').textContent = e.target.value;
+                    });
+
+                    // Add text layer button
+                    document.getElementById('addTextLayer').addEventListener('click', () => this.addTextLayer());
+
+                    // Texture type change
+                    document.getElementById('textureType').addEventListener('change', (e) => {
+                        this.showTextureOptions(e.target.value);
+                    });
+
+                    // Texture upload
+                    const textureUpload = document.getElementById('textureUpload');
+                    const textureUploadArea = document.getElementById('textureUploadArea');
+
+                    // textureUploadArea.addEventListener('click', () => textureUpload.click());
+                    textureUpload.addEventListener('change', (e) => this.handleTextureUpload(e));
+
+                    // Control sliders
+                    this.setupSlider('invertDepth', 'invertDepthValue', v => v === '1' ? 'Yes' : 'No');
+                    this.setupSlider('blurStrength', 'blurStrengthValue');
+                    this.setupSlider('dotSize', 'dotSizeValue');
+                    this.setupSlider('dotDensity', 'dotDensityValue', v => v + '%');
+                    this.setupSlider('patternScale', 'patternScaleValue', v => v + '%');
+                    this.setupSlider('depthStrength', 'depthStrengthValue');
+                    this.setupSlider('patternWidth', 'patternWidthValue');
+                    this.setupSlider('eyeSeparation', 'eyeSeparationValue', v => v + '%');
+                    this.setupSlider('comfortMode', 'comfortModeValue', v => v === '1' ? 'On' : 'Off');
+
+                    // Canvas tabs
+                    document.querySelectorAll('.tab-btn').forEach(tab => {
+                        tab.addEventListener('click', (e) => {
+                            const tabId = e.target.dataset.tab;
+                            this.switchCanvasTab(tabId);
+                        });
+                    });
+
+                    // Generate button
+                    document.getElementById('generateBtn').addEventListener('click', () => this.generateStereogram());
+
+                    // Download button
+                    document.getElementById('downloadBtn').addEventListener('click', () => this.downloadStereogram());
+
+                    // Reset button
+                    document.getElementById('resetBtn').addEventListener('click', () => this.resetAll());
+
+                    // Clear layers button
+                    document.getElementById('clearLayers').addEventListener('click', () => this.clearLayers());
+
+                    // Output size change
+                    document.getElementById('outputSize').addEventListener('change', (e) => {
+                        this.resizeCanvas(e.target.value);
+                    });
+
+                    // Depth image preset click
+                    document.querySelectorAll('#depthImagePresets .preset-image-item').forEach(item => {
+                        item.addEventListener('click', (e) => {
+                            const filename = e.currentTarget.dataset.filename;
+                            this.loadDepthPresetImage(filename);
+                        });
+                    });
+
+                    // Texture image preset click
+                    document.querySelectorAll('#textureImagePresets .preset-image-item').forEach(item => {
+                        item.addEventListener('click', (e) => {
+                            const filename = e.currentTarget.dataset.filename;
+                            this.loadTexturePresetImage(filename);
+                        });
+                    });
+
+                    // Preset invert control
+                    document.getElementById('presetInvert').addEventListener('input', (e) => {
+                        this.presetInvert = e.target.value === '1';
+                        document.getElementById('presetInvertValue').textContent =
+                            this.presetInvert ? 'Yes' : 'No';
+                    });
+                }
+
+                setupSlider(sliderId, displayId, formatter = v => v) {
+                    const slider = document.getElementById(sliderId);
+                    const display = document.getElementById(displayId);
+
+                    slider.addEventListener('input', (e) => {
+                        display.textContent = formatter(e.target.value);
+                        // Update layer opacity if this is a layer slider
+                        if (slider.classList.contains('layer-opacity')) {
+                            const layerIndex = parseInt(slider.dataset.layerIndex);
+                            this.updateLayerOpacity(layerIndex, parseFloat(e.target.value));
+                        }
+                    });
+                }
+
+                showSourceOptions(sourceType) {
+                    console.log(sourceType);
+
+                    // Hide all options
+                    document.querySelectorAll('.source-options').forEach(el => {
+                        el.classList.remove('active');
+                    });
+
+                    // Show selected options
+                    document.getElementById(`${sourceType}Options`).classList.add('active');
+                }
+
+                showTextureOptions(textureType) {
+                    console.log(textureType);
+                    // Hide all options
+                    document.getElementById('randomTextureOptions').classList.remove('active');
+                    document.getElementById('imageTextureOptions').classList.remove('active');
+
+                    // Show selected options
+                    document.getElementById(`${textureType}Options`).classList.add('active');
+                }
+
+                switchCanvasTab(tabId) {
+                    // Update active tab
+                    document.querySelectorAll('.tab-btn').forEach(tab => {
+                        tab.classList.toggle('active', tab.dataset.tab === tabId);
+                    });
+
+                    // Show selected canvas
+                    const depthCanvas = document.getElementById('depthCanvas');
+                    const stereogramCanvas = document.getElementById('stereogramCanvas');
+                    const canvasLabel = document.getElementById('canvasLabel');
+
+                    if (tabId === 'depth') {
+                        depthCanvas.style.display = 'block';
+                        stereogramCanvas.style.display = 'none';
+                        canvasLabel.textContent = 'Depth Map Preview';
+                    } else {
+                        depthCanvas.style.display = 'none';
+                        stereogramCanvas.style.display = 'block';
+                        canvasLabel.textContent = 'Stereogram Preview';
+                    }
+                }
+
+                setupPaintCanvas() {
+                    const canvas = this.canvas.paint;
+                    const ctx = this.ctx.paint;
+
+                    // Initialize paint canvas with white background
+                    // ctx.fillStyle = '#ffffff';
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    this.paintData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                    // Mouse events for painting
+                    canvas.addEventListener('mousedown', (e) => {
+                        this.isPainting = true;
+                        this.paint(e);
+                    });
+
+                    canvas.addEventListener('mousemove', (e) => {
+                        if (this.isPainting) {
+                            this.paint(e);
+                        }
+                    });
+
+                    canvas.addEventListener('mouseup', () => {
+                        this.isPainting = false;
+                    });
+
+                    canvas.addEventListener('mouseleave', () => {
+                        this.isPainting = false;
+                    });
+
+                    // Touch events for mobile
+                    canvas.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        this.isPainting = true;
+                        const touch = e.touches[0];
+                        this.paint(touch);
+                    });
+
+                    canvas.addEventListener('touchmove', (e) => {
+                        e.preventDefault();
+                        if (this.isPainting) {
+                            const touch = e.touches[0];
+                            this.paint(touch);
+                        }
+                    });
+
+                    canvas.addEventListener('touchend', () => {
+                        this.isPainting = false;
+                    });
+                }
+
+                paint(event) {
+                    const canvas = this.canvas.paint;
+                    const ctx = this.ctx.paint;
+                    const rect = canvas.getBoundingClientRect();
+
+                    // Get coordinates
+                    const x = event.clientX ? event.clientX - rect.left : event.touches[0].clientX - rect.left;
+                    const y = event.clientY ? event.clientY - rect.top : event.touches[0].clientY - rect.top;
+
+                    // Scale coordinates for canvas size
+                    const scaleX = canvas.width / rect.width;
+                    const scaleY = canvas.height / rect.height;
+                    const canvasX = x * scaleX;
+                    const canvasY = y * scaleY;
+
+                    // Get brush properties
+                    const brushSize = parseInt(document.getElementById('brushSize').value);
+                    const brushValue = parseInt(document.getElementById('brushValue').value);
+                    const brushMode = document.getElementById('brushMode').value;
+
+                    // Draw on canvas
+                    ctx.beginPath();
+                    ctx.arc(canvasX, canvasY, brushSize, 0, Math.PI * 2);
+
+                    if (brushMode === 'erase') {
+                        // ctx.fillStyle = '#ffffff';
+                        ctx.fillStyle = '#000000';
+                    } else {
+                        const grayValue = Math.min(255, Math.max(0, brushValue));
+                        ctx.fillStyle = `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
+                    }
+
+                    ctx.fill();
+
+                    // Update paint data
+                    this.paintData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                }
+
+
+                // Also, let's improve the processImageToDepth() method to ensure proper scaling:
+                async handleImageUpload(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    this.updateStatus('Processing uploaded image...');
+
+                    try {
+                        const imageData = await this.loadImage(file);
+
+                        // Scale image to match canvas size for better preview
+                        const canvasWidth = this.canvas.depth.width;
+                        const canvasHeight = this.canvas.depth.height;
+                        const scaledData = this.scaleImageData(imageData, canvasWidth, canvasHeight);
+
+                        const processedData = this.processImageToDepth(scaledData);
+
+                        // Store for preview
+                        this.previewImageData = processedData;
+
+                        // Display preview
+                        this.ctx.depth.putImageData(processedData, 0, 0);
+
+                        this.updateStatus('Image uploaded successfully');
+                    } catch (error) {
+                        console.error('Error loading image:', error);
+                        this.updateStatus('Error loading image', true);
+                    }
+                }
+
+                // And add a helper method for deep copying ImageData:
+                deepCopyImageData(imageData) {
+                    const copy = new ImageData(imageData.width, imageData.height);
+                    copy.data.set(imageData.data);
+                    return copy;
+                }
+
+                async handleTextureUpload(event) {
+                    const file = event.target.files[0];
+                    console.log("Uploaded image: ", file);
+
+                    if (!file) return;
+
+                    this.updateStatus('Loading texture image...');
+
+                    try {
+                        const img = new Image();
+                        img.src = URL.createObjectURL(file);
+
+                        img.onload = () => {
+                            this.textureImage = img;
+                            this.updateStatus('Texture loaded successfully');
+                        };
+
+                        img.onerror = () => {
+                            this.updateStatus('Error loading texture image', true);
+                        };
+                    } catch (error) {
+                        console.error('Error loading texture:', error);
+                        this.updateStatus('Error loading texture', true);
+                    }
+                }
+
+                loadImage(file) {
+                    return new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.src = URL.createObjectURL(file);
+
+                        img.onload = () => {
+                            // Create canvas to process image
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+
+                            // Set canvas size to match image
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+
+                            // Draw image
+                            ctx.drawImage(img, 0, 0);
+
+                            // Get image data
+                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            resolve(imageData);
+
+                            // Clean up
+                            URL.revokeObjectURL(img.src);
+                        };
+
+                        img.onerror = reject;
+                    });
+                }
+
+                processImageToDepth(imageData) {
+                    const data = imageData.data;
+                    const width = imageData.width;
+                    const height = imageData.height;
+
+                    // Create new image data for depth map
+                    const depthData = new ImageData(width, height);
+                    const depthArray = depthData.data;
+
+                    // Convert to grayscale (depth map)
+                    for (let i = 0; i < data.length; i += 4) {
+                        const r = data[i];
+                        const g = data[i + 1];
+                        const b = data[i + 2];
+
+                        // Convert to grayscale using luminance formula
+                        const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+
+                        // Apply invert if selected
+                        const invert = document.getElementById('invertDepth').value === '1';
+                        const depthValue = invert ? 255 - gray : gray;
+
+                        // Apply blur if needed
+                        const blurStrength = parseInt(document.getElementById('blurStrength').value);
+                        let finalValue = depthValue;
+
+                        if (blurStrength > 0) {
+                            // Simple box blur (for performance)
+                            const pixelIndex = i / 4;
+                            const x = pixelIndex % width;
+                            const y = Math.floor(pixelIndex / width);
+
+                            let sum = 0;
+                            let count = 0;
+
+                            for (let dy = -blurStrength; dy <= blurStrength; dy++) {
+                                for (let dx = -blurStrength; dx <= blurStrength; dx++) {
+                                    const nx = x + dx;
+                                    const ny = y + dy;
+
+                                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                                        const ni = (ny * width + nx) * 4;
+                                        const nGray = 0.299 * data[ni] + 0.587 * data[ni + 1] + 0.114 * data[ni + 2];
+                                        sum += invert ? 255 - nGray : nGray;
+                                        count++;
+                                    }
+                                }
+                            }
+
+                            finalValue = sum / count;
+                        }
+
+                        // Set depth value (grayscale)
+                        depthArray[i] = finalValue;
+                        depthArray[i + 1] = finalValue;
+                        depthArray[i + 2] = finalValue;
+                        depthArray[i + 3] = 255; // Alpha
+                    }
+
+                    return depthData;
+                }
+
+                selectPreset(preset) {
+                    // Store the selected preset
+                    this.selectedPreset = preset;
+
+                    // Update preview
+                    this.updateStatus(`Selected preset: ${preset}`);
+                }
+
+
+                // Method to load depth preset images
+                async loadDepthPresetImage(filename) {
+                    this.updateStatus(`Loading depth preset: ${filename}...`, true);
+
+                    try {
+                        // Load the image
+                        const image = await this.loadImageFromUrl(`${this.presetImagePath}depth/${filename}`);
+
+                        // Convert to depth map
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = image.width;
+                        canvas.height = image.height;
+                        ctx.drawImage(image, 0, 0);
+
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const processedData = this.processImageToDepth(imageData);
+
+                        // Apply inversion if needed
+                        if (this.presetInvert) {
+                            this.invertDepthMap(processedData);
+                        }
+
+                        // Store for preview
+                        this.previewImageData = processedData;
+
+                        // Display preview (scaled to current canvas size)
+                        const scaledData = this.scaleImageData(processedData,
+                            this.canvas.depth.width,
+                            this.canvas.depth.height);
+                        this.ctx.depth.putImageData(scaledData, 0, 0);
+
+                        this.updateStatus(`Depth preset "${filename}" loaded`);
+                    } catch (error) {
+                        console.error('Error loading depth preset:', error);
+                        this.updateStatus(`Error loading depth preset: ${filename}`, true);
+                    }
+                }
+
+                // Method to load texture preset images
+                async loadTexturePresetImage(filename) {
+                    this.updateStatus(`Loading texture preset: ${filename}...`, true);
+
+                    try {
+                        // Load the image
+                        const image = await this.loadImageFromUrl(`${this.presetImagePath}texture/${filename}`);
+
+                        // Set as texture image
+                        this.textureImage = image;
+
+                        // Switch to image texture mode
+                        document.getElementById('textureType').value = 'imageTexture';
+                        this.showTextureOptions('imageTexture');
+
+                        this.updateStatus(`Texture preset "${filename}" loaded`);
+                    } catch (error) {
+                        console.error('Error loading texture preset:', error);
+                        this.updateStatus(`Error loading texture preset: ${filename}`, true);
+                    }
+                }
+
+                // Helper method to load images from URL
+                loadImageFromUrl(url) {
+                    return new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.crossOrigin = 'anonymous'; // Only if images are from different domain
+
+                        img.onload = () => resolve(img);
+                        img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
+                        img.src = url;
+                    });
+                }
+
+                // Invert depth map method (keep this from previous code)
+                invertDepthMap(imageData) {
+                    const data = imageData.data;
+
+                    for (let i = 0; i < data.length; i += 4) {
+                        data[i] = 255 - data[i];
+                        data[i + 1] = 255 - data[i];
+                        data[i + 2] = 255 - data[i];
+                    }
+
+                    return imageData;
+                }
+
+                addBaseLayer() {
+                    // Create a base layer (empty white)
+                    const width = this.canvas.depth.width;
+                    const height = this.canvas.depth.height;
+
+                    const baseLayer = {
+                        id: 'base',
+                        name: 'Base Layer',
+                        type: 'base',
+                        opacity: 1,
+                        visible: true,
+                        data: this.createEmptyDepthMap(width, height, 255) // White (far away)
+                    };
+
+                    this.layers = [baseLayer];
+                    this.updateLayersUI();
+                }
+
+                // In the addImageLayer() method, change it to:
+                async addImageLayer() {
+                    if (!this.previewImageData) {
+                        this.updateStatus('Please upload an image first', true);
+                        return;
+                    }
+
+                    this.updateStatus('Adding image layer...');
+
+                    // IMPORTANT: Make a copy of the image data to avoid reference issues
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = this.previewImageData.width;
+                    canvas.height = this.previewImageData.height;
+
+                    // Create a fresh ImageData object
+                    const layerData = new ImageData(canvas.width, canvas.height);
+                    layerData.data.set(this.previewImageData.data);
+
+                    const layer = {
+                        id: `image_${Date.now()}`,
+                        name: `Image Layer ${this.layers.length}`,
+                        type: 'image',
+                        opacity: 1,
+                        visible: true,
+                        data: layerData  // Use the copied data
+                    };
+
+                    this.layers.push(layer);
+                    this.updateLayersUI();
+                    this.updateDepthMap();
+
+                    this.updateStatus('Image layer added');
+                }
+
+                addPresetLayer() {
+                    if (!this.selectedPreset) {
+                        this.updateStatus('Please select a preset first', true);
+                        return;
+                    }
+
+                    this.updateStatus('Adding preset layer...');
+
+                    const width = this.canvas.depth.width;
+                    const height = this.canvas.depth.height;
+
+                    // Generate the preset
+                    let presetData = this.generatePresetDepthMap(this.selectedPreset, width, height);
+
+                    // Apply inversion if needed
+                    if (this.presetInvert) {
+                        this.invertDepthMap(presetData);
+                    }
+
+                    const layerName = `${this.selectedPreset} ${this.presetInvert ? '(Inverted)' : ''}`;
+
+                    const layer = {
+                        id: `preset_${Date.now()}`,
+                        name: layerName,
+                        type: 'preset',
+                        opacity: 1,
+                        visible: true,
+                        data: presetData
+                    };
+
+                    this.layers.push(layer);
+                    this.updateLayersUI();
+                    this.updateDepthMap();
+
+                    this.updateStatus('Preset layer added');
+                }
+
+                addPaintLayer() {
+                    this.updateStatus('Adding paint layer...');
+
+                    // Get paint data from canvas
+                    const paintCtx = this.ctx.paint;
+                    const paintData = paintCtx.getImageData(0, 0, this.canvas.paint.width, this.canvas.paint.height);
+
+                    // Scale to match depth canvas size
+                    const scaledData = this.scaleImageData(paintData, this.canvas.depth.width, this.canvas.depth.height);
+
+                    const layer = {
+                        id: `paint_${Date.now()}`,
+                        name: `Paint Layer ${this.layers.length}`,
+                        type: 'paint',
+                        opacity: 1,
+                        visible: true,
+                        data: scaledData
+                    };
+
+                    this.layers.push(layer);
+                    this.updateLayersUI();
+                    this.updateDepthMap();
+
+                    this.updateStatus('Paint layer added');
+                }
+
+                addTextLayer() {
+                    this.updateStatus('Adding text layer...');
+
+                    const text = document.getElementById('textContent').value;
+                    if (!text.trim()) {
+                        this.updateStatus('Please enter text first', true);
+                        return;
+                    }
+
+                    const fontSize = parseInt(document.getElementById('fontSize').value);
+                    const depthValue = parseInt(document.getElementById('textDepth').value);
+
+                    // Create text depth map
+                    const textData = this.createTextDepthMap(text, fontSize, depthValue);
+
+                    const layer = {
+                        id: `text_${Date.now()}`,
+                        name: `Text: ${text.substring(0, 10)}...`,
+                        type: 'text',
+                        opacity: 1,
+                        visible: true,
+                        data: textData
+                    };
+
+                    this.layers.push(layer);
+                    this.updateLayersUI();
+                    this.updateDepthMap();
+
+                    this.updateStatus('Text layer added');
+                }
+
+                generatePresetDepthMap(preset, width, height) {
+                    const imageData = new ImageData(width, height);
+                    const data = imageData.data;
+
+                    // Generate different patterns based on preset
+                    for (let y = 0; y < height; y++) {
+                        for (let x = 0; x < width; x++) {
+                            const i = (y * width + x) * 4;
+                            let value = 0;
+
+                            switch (preset) {
+                                case 'waves':
+                                    // Sine wave pattern
+                                    value = Math.sin(x * 0.05) * Math.sin(y * 0.03) * 127 + 128;
+                                    break;
+                                case 'radial':
+                                    // Radial gradient
+                                    const dx = x - width / 2;
+                                    const dy = y - height / 2;
+                                    const distance = Math.sqrt(dx * dx + dy * dy);
+                                    value = Math.min(255, (distance / (width / 2)) * 255);
+                                    break;
+                                case 'steps':
+                                    // Stepped pattern
+                                    value = Math.floor((x / width) * 4) * 64;
+                                    break;
+                                case 'pyramid':
+                                    // Pyramid pattern
+                                    const centerX = width / 2;
+                                    const centerY = height / 2;
+                                    const distX = Math.abs(x - centerX);
+                                    const distY = Math.abs(y - centerY);
+                                    value = Math.min(255, (distX + distY) * 0.5);
+                                    break;
+                                case 'sphere':
+                                    // Sphere pattern
+                                    const sphereX = x - width / 2;
+                                    const sphereY = y - height / 2;
+                                    const sphereDist = Math.sqrt(sphereX * sphereX + sphereY * sphereY);
+                                    const radius = Math.min(width, height) / 3;
+                                    value = sphereDist < radius ?
+                                        (sphereDist / radius) * 255 :
+                                        255;
+                                    break;
+                                case 'valley':
+                                    // Valley pattern
+                                    value = Math.abs(Math.sin(x * 0.02) * Math.cos(y * 0.02)) * 255;
+                                    break;
+                            }
+
+                            data[i] = value;
+                            data[i + 1] = value;
+                            data[i + 2] = value;
+                            data[i + 3] = 255;
+                            // data[i + 3] = 0;
+                        }
+                    }
+
+                    return imageData;
+                }
+
+                createTextDepthMap(text, fontSize, depthValue) {
+                    // Create a temporary canvas for text rendering
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+
+                    // Set canvas size
+                    tempCanvas.width = this.canvas.depth.width;
+                    tempCanvas.height = this.canvas.depth.height;
+
+                    // Clear canvas
+                    // tempCtx.fillStyle = '#ffffff';
+                    tempCtx.fillStyle = '#000000';
+                    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+                    // Draw text
+                    tempCtx.fillStyle = `rgb(${depthValue}, ${depthValue}, ${depthValue})`;
+                    tempCtx.font = `bold ${fontSize}px Arial`;
+                    tempCtx.textAlign = 'center';
+                    tempCtx.textBaseline = 'middle';
+
+                    // Handle multiline text
+                    const lines = text.split('\n');
+                    const lineHeight = fontSize * 1.2;
+                    const startY = tempCanvas.height / 2 - (lines.length - 1) * lineHeight / 2;
+
+                    for (let i = 0; i < lines.length; i++) {
+                        tempCtx.fillText(
+                            lines[i],
+                            tempCanvas.width / 2,
+                            startY + i * lineHeight
+                        );
+                    }
+
+                    // Get image data
+                    return tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+                }
+
+                createEmptyDepthMap(width, height, value) {
+                    const imageData = new ImageData(width, height);
+                    const data = imageData.data;
+
+                    for (let i = 0; i < data.length; i += 4) {
+                        data[i] = value;
+                        data[i + 1] = value;
+                        data[i + 2] = value;
+                        data[i + 3] = 255;
+                    }
+
+                    return imageData;
+                }
+
+                scaleImageData(sourceData, targetWidth, targetHeight) {
+                    // Create source canvas
+                    const sourceCanvas = document.createElement('canvas');
+                    const sourceCtx = sourceCanvas.getContext('2d');
+                    sourceCanvas.width = sourceData.width;
+                    sourceCanvas.height = sourceData.height;
+                    sourceCtx.putImageData(sourceData, 0, 0);
+
+                    // Create target canvas
+                    const targetCanvas = document.createElement('canvas');
+                    const targetCtx = targetCanvas.getContext('2d');
+                    targetCanvas.width = targetWidth;
+                    targetCanvas.height = targetHeight;
+
+                    // Use smooth scaling
+                    targetCtx.imageSmoothingEnabled = true;
+                    targetCtx.imageSmoothingQuality = 'high';
+
+                    // Draw and scale
+                    targetCtx.drawImage(sourceCanvas, 0, 0, targetWidth, targetHeight);
+
+                    return targetCtx.getImageData(0, 0, targetWidth, targetHeight);
+                }
+
+                // Also, when adding layers, we need to update them to the current canvas size:
+                // Add this method to ensure layer data matches current canvas size:
+                updateAllLayersToCurrentSize() {
+                    const width = this.canvas.depth.width;
+                    const height = this.canvas.depth.height;
+
+                    for (let i = 0; i < this.layers.length; i++) {
+                        const layer = this.layers[i];
+                        if (layer.data.width !== width || layer.data.height !== height) {
+                            layer.data = this.scaleImageData(layer.data, width, height);
+                        }
+                    }
+                }
+
+                updateLayersUI() {
+                    const layersList = document.getElementById('layersList');
+                    layersList.innerHTML = '';
+
+                    // Update layer count
+                    document.getElementById('layerCount').textContent = `Layers: ${this.layers.length}`;
+
+                    // Create layer items
+                    this.layers.forEach((layer, index) => {
+                        const layerItem = document.createElement('div');
+                        layerItem.className = 'layer-item';
+                        layerItem.draggable = true;
+                        layerItem.dataset.index = index;
+
+                        layerItem.innerHTML = `
+                        <div class="layer-header">
+                            <span class="layer-name">${layer.name}</span>
+                            <div class="layer-controls">
+                                <button class="layer-btn layer-visibility ${layer.visible ? 'active' : ''}" 
+                                        title="Toggle visibility" data-index="${index}">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                    </svg>
+                                </button>
+                                ${index > 0 ? `
+                                    <button class="layer-btn layer-remove" title="Remove layer" data-index="${index}">
+                                        <svg viewBox="0 0 24 24">
+                                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                                        </svg>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" class="layer-opacity" min="0" max="1" step="0.1" 
+                                   value="${layer.opacity}" data-layer-index="${index}">
+                            <div class="value-display layer-opacity-value">${layer.opacity.toFixed(1)}</div>
+                        </div>
+                    `;
+
+                        layersList.appendChild(layerItem);
+                    });
+
+                    // Add event listeners for layer controls
+                    document.querySelectorAll('.layer-opacity').forEach(inpt => {
+                        // console.log("test", inpt);
+                        const slider = inpt;
+                        const display = inpt.parentNode.children[1];
+
+                        slider.addEventListener('input', (e) => {
+                            display.textContent = e.target.value;
+                            // Update layer opacity if this is a layer slider
+                            if (slider.classList.contains('layer-opacity')) {
+                                const layerIndex = parseInt(slider.dataset.layerIndex);
+                                this.updateLayerOpacity(layerIndex, parseFloat(e.target.value));
+                            }
+                        });
+                    });
+
+                    document.querySelectorAll('.layer-visibility').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const index = parseInt(e.currentTarget.dataset.index);
+                            this.toggleLayerVisibility(index);
+                        });
+                    });
+
+                    document.querySelectorAll('.layer-remove').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const index = parseInt(e.currentTarget.dataset.index);
+                            this.removeLayer(index);
+                        });
+                    });
+
+                    // Add drag and drop for reordering
+                    this.setupLayerDragAndDrop();
+                }
+
+                toggleLayerVisibility(index) {
+                    this.layers[index].visible = !this.layers[index].visible;
+                    this.updateLayersUI();
+                    this.updateDepthMap();
+                }
+
+                removeLayer(index) {
+                    // Don't remove the base layer
+                    if (index === 0) return;
+
+                    this.layers.splice(index, 1);
+                    this.updateLayersUI();
+                    this.updateDepthMap();
+                }
+
+                updateLayerOpacity(index, opacity) {
+                    this.layers[index].opacity = opacity;
+                    this.updateDepthMap();
+                }
+
+                setupLayerDragAndDrop() {
+                    const layersList = document.getElementById('layersList');
+                    let draggedItem = null;
+
+                    // Drag start
+                    layersList.querySelectorAll('.layer-item').forEach(item => {
+                        item.addEventListener('dragstart', (e) => {
+                            draggedItem = item;
+                            setTimeout(() => {
+                                item.style.display = 'none';
+                            }, 0);
+                        });
+
+                        item.addEventListener('dragend', () => {
+                            setTimeout(() => {
+                                draggedItem.style.display = '';
+                                draggedItem = null;
+                            }, 0);
+                        });
+
+                        // Allow drop
+                        item.addEventListener('dragover', (e) => {
+                            e.preventDefault();
+                        });
+
+                        item.addEventListener('drop', (e) => {
+                            e.preventDefault();
+                            if (draggedItem && draggedItem !== item) {
+                                const fromIndex = parseInt(draggedItem.dataset.index);
+                                const toIndex = parseInt(item.dataset.index);
+
+                                // Don't allow moving the base layer
+                                if (fromIndex === 0 || toIndex === 0) return;
+
+                                // Reorder layers
+                                const [movedLayer] = this.layers.splice(fromIndex, 1);
+                                this.layers.splice(toIndex, 0, movedLayer);
+
+                                this.updateLayersUI();
+                                this.updateDepthMap();
+                            }
+                        });
+                    });
+                }
+
+
+                // Update the updateDepthMap() method to properly handle different canvas sizes:
+                updateDepthMap() {
+                    const width = this.canvas.depth.width;
+                    const height = this.canvas.depth.height;
+
+                    // Clear the canvas first
+                    this.ctx.depth.clearRect(0, 0, width, height);
+
+                    // If we don't have layers yet, initialize with white
+                    if (this.layers.length === 0) {
+                        this.ctx.depth.fillStyle = '#ffffff';
+                        this.ctx.depth.fillRect(0, 0, width, height);
+                        return;
+                    }
+
+                    // Start with the base layer or white background
+                    let compositeData;
+
+                    if (this.layers.length > 0 && this.layers[0].visible && this.layers[0].opacity > 0) {
+                        const baseLayer = this.layers[0];
+                        // Scale base layer to current canvas size if needed
+                        if (baseLayer.data.width !== width || baseLayer.data.height !== height) {
+                            baseLayer.data = this.scaleImageData(baseLayer.data, width, height);
+                        }
+                        compositeData = new ImageData(width, height);
+                        compositeData.data.set(baseLayer.data.data);
+
+                        // Apply base layer opacity
+                        if (baseLayer.opacity < 1) {
+                            const data = compositeData.data;
+                            for (let i = 0; i < data.length; i += 4) {
+                                const alpha = baseLayer.opacity;
+                                data[i] = data[i] * alpha + 255 * (1 - alpha);
+                                data[i + 1] = data[i + 1] * alpha + 255 * (1 - alpha);
+                                data[i + 2] = data[i + 2] * alpha + 255 * (1 - alpha);
+                            }
+                        }
+                    } else {
+                        // Start with white background
+                        compositeData = new ImageData(width, height);
+                        const data = compositeData.data;
+                        for (let i = 0; i < data.length; i += 4) {
+                            data[i] = 255;
+                            data[i + 1] = 255;
+                            data[i + 2] = 255;
+                            data[i + 3] = 255;
+                        }
+                    }
+
+                    // Apply other layers
+                    for (let i = 1; i < this.layers.length; i++) {
+                        const layer = this.layers[i];
+                        if (!layer.visible || layer.opacity <= 0) continue;
+
+                        // Scale layer to current canvas size
+                        let layerData = layer.data;
+                        if (layerData.width !== width || layerData.height !== height) {
+                            layerData = this.scaleImageData(layerData, width, height);
+                            // Update the layer data with scaled version
+                            layer.data = layerData;
+                        }
+
+                        const layerPixels = layerData.data;
+                        const compositePixels = compositeData.data;
+                        const alpha = layer.opacity;
+
+                        for (let j = 0; j < compositePixels.length; j += 4) {
+                            if (alpha >= 1) {
+                                compositePixels[j] = layerPixels[j];
+                                compositePixels[j + 1] = layerPixels[j + 1];
+                                compositePixels[j + 2] = layerPixels[j + 2];
+                            } else {
+                                compositePixels[j] = compositePixels[j] * (1 - alpha) + layerPixels[j] * alpha;
+                                compositePixels[j + 1] = compositePixels[j + 1] * (1 - alpha) + layerPixels[j + 1] * alpha;
+                                compositePixels[j + 2] = compositePixels[j + 2] * (1 - alpha) + layerPixels[j + 2] * alpha;
+                            }
+                        }
+                    }
+
+                    // Store the composite depth map
+                    this.currentDepthMap = compositeData;
+
+                    // Draw to canvas - this will fill the entire canvas
+                    this.ctx.depth.putImageData(compositeData, 0, 0);
+                }
+
+                generateStereogram() {
+                    if (!this.currentDepthMap) {
+                        this.updateStatus('Please create a depth map first', true);
+                        return;
+                    }
+
+                    this.updateStatus('Generating stereogram...', true);
+
+                    // Get parameters
+                    const depthStrength = parseInt(document.getElementById('depthStrength').value);
+                    const patternWidth = parseInt(document.getElementById('patternWidth').value);
+                    const eyeSeparation = parseInt(document.getElementById('eyeSeparation').value) / 100;
+                    const comfortMode = document.getElementById('comfortMode').value === '1';
+
+                    // Generate texture
+                    const textureType = document.getElementById('textureType').value;
+                    let textureData;
+
+                    if (textureType === 'randomTexture') {
+                        const dotSize = parseInt(document.getElementById('dotSize').value);
+                        const dotDensity = parseInt(document.getElementById('dotDensity').value) / 100;
+                        textureData = this.generateRandomTexture(dotSize, dotDensity);
+                    } else {
+                        if (!this.textureImage) {
+                            this.updateStatus('Please upload a texture image first', true);
+                            return;
+                        }
+
+                        const patternScale = parseInt(document.getElementById('patternScale').value) / 100;
+                        textureData = this.generateImageTexture(patternScale);
+                    }
+
+                    // Generate stereogram
+                    const stereogramData = this.generateStereogramData(
+                        this.currentDepthMap,
+                        textureData,
+                        depthStrength,
+                        patternWidth,
+                        eyeSeparation,
+                        comfortMode
+                    );
+
+                    // Display stereogram
+                    this.ctx.stereogram.putImageData(stereogramData, 0, 0);
+
+                    // Switch to stereogram tab
+                    this.switchCanvasTab('stereogram');
+
+                    this.updateStatus('Stereogram generated successfully!');
+                }
+
+                generateRandomTexture(dotSize, density) {
+                    const width = this.canvas.depth.width;
+                    const height = this.canvas.depth.height;
+                    const textureData = new ImageData(width, height);
+                    const pixels = textureData.data;
+
+                    // Fill with black
+                    for (let i = 0; i < pixels.length; i += 4) {
+                        pixels[i] = 0;
+                        pixels[i + 1] = 0;
+                        pixels[i + 2] = 0;
+                        pixels[i + 3] = 255;
+                    }
+
+                    // Generate random dots
+                    for (let y = 0; y < height; y += dotSize) {
+                        for (let x = 0; x < width; x += dotSize) {
+                            if (Math.random() < density) {
+                                // Random color
+                                const r = Math.floor(Math.random() * 256);
+                                const g = Math.floor(Math.random() * 256);
+                                const b = Math.floor(Math.random() * 256);
+
+                                // Draw dot (simple square)
+                                for (let dy = 0; dy < dotSize && y + dy < height; dy++) {
+                                    for (let dx = 0; dx < dotSize && x + dx < width; dx++) {
+                                        const i = ((y + dy) * width + (x + dx)) * 4;
+                                        pixels[i] = r;
+                                        pixels[i + 1] = g;
+                                        pixels[i + 2] = b;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    return textureData;
+                }
+
+                generateImageTexture(scale) {
+                    if (!this.textureImage) return null;
+
+                    const width = this.canvas.depth.width;
+                    const height = this.canvas.depth.height;
+
+                    // Create a temporary canvas for the texture
+                    const textureCanvas = document.createElement('canvas');
+                    const textureCtx = textureCanvas.getContext('2d');
+                    textureCanvas.width = width;
+                    textureCanvas.height = height;
+
+                    // Calculate scaled texture size
+                    const textureWidth = this.textureImage.width * scale;
+                    const textureHeight = this.textureImage.height * scale;
+
+                    // Tile the texture
+                    for (let y = 0; y < height; y += textureHeight) {
+                        for (let x = 0; x < width; x += textureWidth) {
+                            textureCtx.drawImage(
+                                this.textureImage,
+                                0, 0, this.textureImage.width, this.textureImage.height,
+                                x, y, textureWidth, textureHeight
+                            );
+                        }
+                    }
+
+                    return textureCtx.getImageData(0, 0, width, height);
+                }
+
+                generateStereogramData(depthMap, textureData, depthStrength, patternWidth, eyeSeparation, comfortMode) {
+                    const width = depthMap.width;
+                    const height = depthMap.height;
+                    const depthPixels = depthMap.data;
+                    const texturePixels = textureData.data;
+
+                    // Create output image data
+                    const outputData = new ImageData(width, height);
+                    const outputPixels = outputData.data;
+
+                    // Calculate maximum shift
+                    const maxShift = Math.floor(patternWidth * (depthStrength / 100));
+
+                    // Create initial pattern (first patternWidth columns)
+                    for (let y = 0; y < height; y++) {
+                        for (let x = 0; x < patternWidth; x++) {
+                            const texIndex = (y * width + x) * 4;
+                            const outIndex = (y * width + x) * 4;
+
+                            // Copy from texture
+                            outputPixels[outIndex] = texturePixels[texIndex];
+                            outputPixels[outIndex + 1] = texturePixels[texIndex + 1];
+                            outputPixels[outIndex + 2] = texturePixels[texIndex + 2];
+                            outputPixels[outIndex + 3] = 255;
+                        }
+                    }
+
+                    // Generate stereogram using depth map
+                    for (let y = 0; y < height; y++) {
+                        for (let x = patternWidth; x < width; x++) {
+                            // Get depth value (0-255) from depth map
+                            const depthIndex = (y * width + x) * 4;
+                            const depthValue = depthPixels[depthIndex]; // Use red channel (grayscale)
+
+                            // Calculate shift based on depth
+                            // Near objects (white = 255) shift more, far objects (black = 0) shift less
+                            const normalizedDepth = depthValue / 255;
+                            let shift = Math.floor(normalizedDepth * maxShift * eyeSeparation);
+
+                            // Apply comfort mode (limit extreme shifts)
+                            if (comfortMode) {
+                                shift = Math.min(shift, patternWidth * 0.8);
+                            }
+
+                            // Ensure we don't go out of bounds
+                            const sourceX = x - patternWidth + shift;
+
+                            if (sourceX >= 0 && sourceX < width) {
+                                const sourceIndex = (y * width + sourceX) * 4;
+                                const targetIndex = (y * width + x) * 4;
+
+                                // Copy pixel from shifted position
+                                outputPixels[targetIndex] = outputPixels[sourceIndex];
+                                outputPixels[targetIndex + 1] = outputPixels[sourceIndex + 1];
+                                outputPixels[targetIndex + 2] = outputPixels[sourceIndex + 2];
+                                outputPixels[targetIndex + 3] = 255;
+                            }
+                        }
+                    }
+
+                    return outputData;
+                }
+
+                downloadStereogram() {
+                    // Create a temporary link
+                    const link = document.createElement('a');
+                    link.download = 'stereogram.png';
+
+                    // Convert canvas to data URL
+                    this.canvas.stereogram.toBlob((blob) => {
+                        link.href = URL.createObjectURL(blob);
+                        link.click();
+                        URL.revokeObjectURL(link.href);
+                    });
+
+                    this.updateStatus('Stereogram downloaded');
+                }
+
+                resizeCanvas(sizeStr) {
+                    const [width, height] = sizeStr.split('x').map(Number);
+
+                    // Resize canvases
+                    this.canvas.depth.width = width;
+                    this.canvas.depth.height = height;
+                    this.canvas.stereogram.width = width;
+                    this.canvas.stereogram.height = height;
+
+                    // // Update CSS to maintain display size (optional, but helps with preview)
+                    // this.canvas.depth.style.width = '100%';
+                    // this.canvas.depth.style.height = 'auto';
+                    // this.canvas.stereogram.style.width = '100%';
+                    // this.canvas.stereogram.style.height = 'auto';
+
+                    // Update all layers to new size
+                    this.updateAllLayersToCurrentSize();
+
+                    // Update depth map preview
+                    this.updateDepthMap();
+
+                    this.updateStatus(`Canvas resized to ${width}×${height}`);
+                }
+
+                resetAll() {
+                    if (confirm('Are you sure you want to reset everything? All layers and settings will be lost.')) {
+                        // Reset layers
+                        this.layers = [];
+                        this.addBaseLayer();
+
+                        // Reset paint canvas
+                        // this.ctx.paint.fillStyle = '#ffffff';
+                        this.ctx.paint.fillStyle = '#000000';
+                        this.ctx.paint.fillRect(0, 0, this.canvas.paint.width, this.canvas.paint.height);
+                        this.paintData = this.ctx.paint.getImageData(0, 0, this.canvas.paint.width, this.canvas.paint.height);
+
+                        // Reset texture
+                        this.textureImage = null;
+                        this.textureData = null;
+
+                        // Reset controls to defaults
+                        document.getElementById('depthSourceType').value = 'image';
+                        this.showSourceOptions('image');
+
+                        document.getElementById('textureType').value = 'randomTexture';
+                        this.showTextureOptions('randomTexture');
+
+                        document.getElementById('invertDepth').value = 0;
+                        document.getElementById('invertDepthValue').textContent = 'No';
+
+                        document.getElementById('blurStrength').value = 0;
+                        document.getElementById('blurStrengthValue').textContent = '0';
+
+                        document.getElementById('brushSize').value = 10;
+                        document.getElementById('brushSizeValue').textContent = '10';
+
+                        document.getElementById('brushValue').value = 128;
+                        document.getElementById('brushValueValue').textContent = '128';
+
+                        document.getElementById('brushMode').value = 'draw';
+
+                        document.getElementById('textContent').value = '3D';
+
+                        document.getElementById('fontSize').value = 48;
+                        document.getElementById('fontSizeValue').textContent = '48';
+
+                        document.getElementById('textDepth').value = 200;
+                        document.getElementById('textDepthValue').textContent = '200';
+
+                        document.getElementById('dotSize').value = 3;
+                        document.getElementById('dotSizeValue').textContent = '3';
+
+                        document.getElementById('dotDensity').value = 50;
+                        document.getElementById('dotDensityValue').textContent = '50%';
+
+                        document.getElementById('patternScale').value = 100;
+                        document.getElementById('patternScaleValue').textContent = '100%';
+
+                        document.getElementById('depthStrength').value = 30;
+                        document.getElementById('depthStrengthValue').textContent = '30';
+
+                        document.getElementById('patternWidth').value = 120;
+                        document.getElementById('patternWidthValue').textContent = '120';
+
+                        document.getElementById('eyeSeparation').value = 65;
+                        document.getElementById('eyeSeparationValue').textContent = '65%';
+
+                        document.getElementById('comfortMode').value = 1;
+                        document.getElementById('comfortModeValue').textContent = 'On';
+
+                        document.getElementById('outputSize').value = '800x600';
+
+                        // Switch to depth map tab
+                        this.switchCanvasTab('depth');
+
+                        this.updateStatus('All settings have been reset');
+                    }
+                }
+
+                clearLayers() {
+                    if (this.layers.length <= 1) {
+                        this.updateStatus('No additional layers to clear', true);
+                        return;
+                    }
+
+                    if (confirm('Are you sure you want to clear all layers except the base layer?')) {
+                        // Keep only the base layer
+                        this.layers = [this.layers[0]];
+                        this.updateLayersUI();
+                        this.updateDepthMap();
+
+                        this.updateStatus('All additional layers cleared');
+                    }
+                }
+
+                updateStatus(message, showLoading = false) {
+                    document.getElementById('statusText').textContent = message;
+
+                    const spinner = document.getElementById('loadingSpinner');
+                    if (showLoading) {
+                        spinner.classList.add('active');
+                    } else {
+                        spinner.classList.remove('active');
+                    }
+                }
+            }
+
+            // Initialize the application when the page loads
+            document.addEventListener('DOMContentLoaded', () => {
+                const app = new StereogramGenerator();
+                window.stereogramApp = app; // Make available for debugging
+            });
+        </script>
+    </body>
+
+</html>
