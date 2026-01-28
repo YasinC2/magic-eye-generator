@@ -17,16 +17,19 @@
             /* width */
             ::-webkit-scrollbar {
                 width: 10px;
+                border-radius: 8px;
             }
 
             /* Track */
             ::-webkit-scrollbar-track {
                 background: #a0a0c0;
+                border-radius: 8px;
             }
 
             /* Handle */
             ::-webkit-scrollbar-thumb {
                 background: #2d4263;
+                border-radius: 8px;
             }
 
             /* Handle on hover */
@@ -34,6 +37,9 @@
                 background: #1c2b41;
             }
 
+            html {
+                font-size: 12px;
+            }
 
             body {
                 background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -69,8 +75,8 @@
 
             .app-container {
                 display: grid;
-                grid-template-columns: 350px 1fr 350px;
-                gap: 20px;
+                grid-template-columns: 300px 1fr 300px;
+                gap: 15px;
                 max-width: 2000px;
                 margin: 0 auto 50px;
             }
@@ -78,7 +84,7 @@
             .panel {
                 background: rgba(30, 30, 46, 0.85);
                 border-radius: 12px;
-                padding: 20px;
+                padding: 12px;
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
                 border: 1px solid #2d4263;
                 height: fit-content;
@@ -116,12 +122,13 @@
                 background: #0f1525;
                 border-radius: 8px;
                 /* padding: 15px; */
-                margin-bottom: 20px;
+                /* margin-bottom: 20px; */
                 border: 1px solid #2d4263;
                 display: flex;
                 justify-content: center;
                 align-items: center;
                 overflow: hidden;
+                position: relative;
             }
 
             canvas {
@@ -146,6 +153,29 @@
                 border: 2px solid #ff7e5f;
             }
 
+            .stereogram-canvas.open {
+                position: fixed;
+                width: calc(100vw - 20px);
+                height: calc(100vh - 20px);
+                top: 10px;
+                right: auto;
+                left: auto;
+                bottom: 10px;
+                z-index: 1000;
+            }
+
+            .overlay {
+                position: fixed;
+                width: 100vw;
+                height: 100vh;
+                top: 0;
+                right: 0;
+                left: 0;
+                bottom: 0;
+                z-index: 900;
+                background-color: rgba(0, 0, 0, 0.3);
+            }
+
             .canvas-tabs {
                 display: flex;
                 width: 100%;
@@ -158,7 +188,7 @@
 
             .tab-btn {
                 flex: 1;
-                padding: 12px;
+                padding: 6px;
                 background: transparent;
                 border: none;
                 color: #a0a0c0;
@@ -178,6 +208,7 @@
                 margin-bottom: 10px;
                 color: #a0a0c0;
                 text-align: center;
+                display: none;
             }
 
             .control-group {
@@ -232,7 +263,7 @@
             button,
             input[type="file"] {
                 width: 100%;
-                padding: 12px 15px;
+                padding: 8px;
                 background: #2d4263;
                 color: #e6e6e6;
                 border: 1px solid #3a506b;
@@ -242,8 +273,9 @@
                 transition: all 0.3s;
             }
 
-            select:hover,
-            button:hover:not(:disabled) {
+            /* button:hover:not(:disabled), */
+            .btn-secondary:hover,
+            select:hover {
                 background: #3a506b;
                 border-color: #ff7e5f;
             }
@@ -258,6 +290,10 @@
                 color: #1a1a2e;
                 font-weight: 700;
                 border: none;
+            }
+
+            .btn-primary:hover {
+                box-shadow: 0 0 100px 0 rgba(0, 0, 0, 0.2) inset;
             }
 
             .btn-secondary {
@@ -284,7 +320,7 @@
                 display: none;
                 margin-top: 15px;
                 padding: 15px;
-                background: rgba(26, 26, 46, 0.7);
+                background: #2a2a3eb3;
                 border-radius: 8px;
                 border-left: 4px solid #ff7e5f;
             }
@@ -307,7 +343,7 @@
             .upload-area {
                 border: 2px dashed #3a506b;
                 border-radius: 8px;
-                padding: 30px;
+                padding: 12px;
                 text-align: center;
                 margin-bottom: 15px;
                 cursor: pointer;
@@ -352,7 +388,7 @@
             .layer-item {
                 background: rgba(26, 26, 46, 0.7);
                 border-radius: 8px;
-                padding: 15px;
+                padding: 10px;
                 margin-bottom: 10px;
                 border: 1px solid #2d4263;
                 display: flex;
@@ -413,8 +449,8 @@
             .action-buttons {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 15px;
-                margin-top: 25px;
+                gap: 4px;
+                /* margin-top: 25px; */
             }
 
             .divider {
@@ -452,7 +488,7 @@
                 left: 0;
                 right: 0;
                 background: rgba(26, 26, 46, 0.95);
-                padding: 12px 20px;
+                padding: 4px 10px;
                 border-top: 1px solid #2d4263;
                 display: flex;
                 justify-content: space-between;
@@ -548,7 +584,7 @@
             .preset-images-grid {
                 display: grid;
                 /* grid-template-columns: repeat(3, 1fr); */
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
                 gap: 10px;
                 margin-top: 10px;
                 width: 100%;
@@ -576,7 +612,7 @@
             .preset-image-preview {
                 width: 100%;
                 height: 80px;
-                background: #1a1a2e;
+                background: #000;
                 border-radius: 4px;
                 margin-bottom: 8px;
                 display: flex;
@@ -609,10 +645,54 @@
                 overflow-x: hidden;
             }
 
+            .mb-16 {
+                margin-bottom: 16px;
+            }
+
+            .mt-16 {
+                margin-top: 16px;
+            }
+
             .preset-image-item .preset-image-preview {
                 background-size: contain;
                 background-position: center;
                 background-repeat: no-repeat;
+            }
+
+            .icon-btn {
+                position: absolute;
+                width: 30px;
+                height: 30px;
+                outline: 0;
+                border: 0;
+                background: transparent;
+                cursor: pointer;
+                padding: 0;
+            }
+
+            .icon-btn#maximize {
+                bottom: 5px;
+                right: 5px;
+            }
+
+            .icon-btn#minimize {
+                position: fixed;
+                top: 5px;
+                right: 5px;
+                z-index: 1001;
+            }
+
+            .icon-btn svg {
+                max-width: 100%;
+                max-height: 100%;
+            }
+
+            path.icon-bg {
+                transition: all 0.3s;
+            }
+
+            .icon-btn:hover svg .icon-bg {
+                opacity: 1 !important;
             }
 
             .preset-image-item[data-filename*="texture"] .preset-image-preview {
@@ -680,7 +760,7 @@
                         <div class="upload-icon">📁</div>
                         <p>Click to upload or drag & drop</p>
                         <p class="tip">PNG, JPG up to 5MB</p>
-                        <input type="file" id="imageUpload" accept=".jpg,.jpeg,.png" style="display: non;">
+                        <input type="file" id="imageUpload" accept=".jpg,.jpeg,.png" style="display: none;">
                     </label>
 
                     <div class="control-group" style="display: none;">
@@ -753,7 +833,7 @@
                     </button>
                 </div>
 
-                <div class="control-group">
+                <div class="control-group mt-16">
                     <label class="control-label">Invert Shape</label>
                     <div class="slider-container">
                         <input type="range" id="presetInvert" min="0" max="1" step="1" value="0">
@@ -872,25 +952,26 @@
                 <div class="canvas-container">
                     <canvas id="depthCanvas" class="depth-canvas" width="800" height="600"></canvas>
                     <canvas id="stereogramCanvas" class="stereogram-canvas" width="800" height="600" style="display: none;"></canvas>
+                    <button class="icon-btn" id="maximize" style="display: none;">
+                        <svg width="800" height="800" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g fill="#000">
+                                <path class="icon-bg" opacity=".5" fill="#ffffff" d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z" />
+                                <path d="M13.25 7c0 .414.336.75.75.75h1.19l-2.22 2.22a.75.75 0 1 0 1.06 1.06l2.22-2.22V10a.75.75 0 0 0 1.5 0V7a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75Zm-2.22 7.03a.75.75 0 1 0-1.06-1.06l-2.22 2.22V14a.75.75 0 0 0-1.5 0v3c0 .414.336.75.75.75h3a.75.75 0 0 0 0-1.5H8.81l2.22-2.22ZM10.75 7a.75.75 0 0 1-.75.75H8.81l2.22 2.22a.75.75 0 1 1-1.06 1.06L7.75 8.81V10a.75.75 0 0 1-1.5 0V7A.75.75 0 0 1 7 6.25h3a.75.75 0 0 1 .75.75Zm2.22 7.03a.75.75 0 1 1 1.06-1.06l2.22 2.22V14a.75.75 0 0 1 1.5 0v3a.75.75 0 0 1-.75.75h-3a.75.75 0 0 1 0-1.5h1.19l-2.22-2.22Z" />
+                            </g>
+                        </svg>
+                    </button>
+                    <button class="icon-btn" id="minimize" style="display: none;">
+                        <svg width="800" height="800" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g fill="#000">
+                                <path class="icon-bg" opacity=".5" fill="#ffffff" d="M12 22c-4.714 0-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12s0-7.071 1.464-8.536C4.93 2 7.286 2 12 2c4.714 0 7.071 0 8.535 1.464C22 4.93 22 7.286 22 12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22Z" />
+                                <path d="M8.97 8.97a.75.75 0 0 1 1.06 0L12 10.94l1.97-1.97a.75.75 0 1 1 1.06 1.06L13.06 12l1.97 1.97a.75.75 0 1 1-1.06 1.06L12 13.06l-1.97 1.97a.75.75 0 0 1-1.06-1.06L10.94 12l-1.97-1.97a.75.75 0 0 1 0-1.06Z" />
+                            </g>
+                        </svg>
+                    </button>
                 </div>
 
                 <div class="canvas-label" id="canvasLabel">Depth Map Preview</div>
 
-                <div class="action-buttons">
-                    <button id="generateBtn" class="btn-primary btn-icon">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M9 12l-4.463 4.969-4.537-4.969h3c0-4.97 4.03-9 9-9 2.395 0 4.565.942 6.179 2.468l-2.004 2.231c-1.081-1.05-2.553-1.699-4.175-1.699-3.309 0-6 2.691-6 6h3z" />
-                            <path d="M20.463 7.031l-4.463 4.969h3c0 3.309-2.691 6-6 6-1.622 0-3.094-.649-4.175-1.699l-2.004 2.231c1.614 1.526 3.784 2.468 6.179 2.468 4.97 0 9-4.03 9-9h3l-4.537-4.969z" />
-                        </svg>
-                        Generate Stereogram
-                    </button>
-                    <button id="downloadBtn" class="btn-secondary btn-icon">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
-                        </svg>
-                        Download PNG
-                    </button>
-                </div>
             </div>
 
             <!-- Controls Panel -->
@@ -1030,8 +1111,25 @@
                 <span id="statusText">Ready to create stereogram</span>
                 <div class="loading-spinner" id="loadingSpinner"></div>
             </div>
+            <div class="action-buttons">
+                <button id="generateBtn" class="btn-primary btn-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M9 12l-4.463 4.969-4.537-4.969h3c0-4.97 4.03-9 9-9 2.395 0 4.565.942 6.179 2.468l-2.004 2.231c-1.081-1.05-2.553-1.699-4.175-1.699-3.309 0-6 2.691-6 6h3z" />
+                        <path d="M20.463 7.031l-4.463 4.969h3c0 3.309-2.691 6-6 6-1.622 0-3.094-.649-4.175-1.699l-2.004 2.231c1.614 1.526 3.784 2.468 6.179 2.468 4.97 0 9-4.03 9-9h3l-4.537-4.969z" />
+                    </svg>
+                    Generate Stereogram
+                </button>
+                <button id="downloadBtn" class="btn-secondary btn-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                    </svg>
+                    Download PNG
+                </button>
+            </div>
             <div id="layerCount">Layers: 1</div>
         </div>
+
+        <div class="overlay" style="display: none;"></div>
 
         <a href="https://github.com/YasinC2/magic-eye-generator" aria-label="View source on GitHub" title="View source on GitHub" target="_blank" style="position: absolute;width: 60px;height: 60px;display: inline-block;clip-path: polygon(100% 0%, 0% 0%, 100% 100%);top: 0;right: 0;bottom: auto;left: auto;background-color: transparent;background-repeat: no-repeat;background-position: center center;background-size: 100% 100%;text-decoration: none">
             <svg width="60" height="60" viewBox="0 0 21.147 21.147" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" fill="#ff7e5f" aria-hidden="true" focusable="false">
@@ -1205,6 +1303,33 @@
                         document.getElementById('presetInvertValue').textContent =
                             this.presetInvert ? 'Yes' : 'No';
                     });
+
+                    // Open Result Fullscreen
+                    let overlay = document.querySelector('.overlay');
+                    let minimize = document.getElementById('minimize');
+                    document.getElementById('maximize').addEventListener('click', (e) => {
+                        let isOpen = this.canvas.stereogram.classList.contains('open');
+                        if (!isOpen) {
+                            this.canvas.stereogram.classList.add('open');
+                            overlay.style.display = "block";
+                            minimize.style.display = "block";
+                        } else {
+                            this.canvas.stereogram.classList.remove('open');
+                            overlay.style.display = "none";
+                            minimize.style.display = "none";
+                        }
+                    });
+
+                    overlay.addEventListener('click', (e) => {
+                        this.canvas.stereogram.classList.remove('open');
+                        overlay.style.display = "none";
+                    });
+
+                    minimize.addEventListener('click', (e) => {
+                        this.canvas.stereogram.classList.remove('open');
+                        overlay.style.display = "none";
+                        minimize.style.display = "none";
+                    });
                 }
 
                 setupSlider(sliderId, displayId, formatter = v => v) {
@@ -1253,14 +1378,17 @@
                     const depthCanvas = document.getElementById('depthCanvas');
                     const stereogramCanvas = document.getElementById('stereogramCanvas');
                     const canvasLabel = document.getElementById('canvasLabel');
+                    const openStereogramCanvasBtn = document.getElementById('maximize');
 
                     if (tabId === 'depth') {
                         depthCanvas.style.display = 'block';
                         stereogramCanvas.style.display = 'none';
+                        openStereogramCanvasBtn.style.display = 'none';
                         canvasLabel.textContent = 'Depth Map Preview';
                     } else {
                         depthCanvas.style.display = 'none';
                         stereogramCanvas.style.display = 'block';
+                        openStereogramCanvasBtn.style.display = 'block';
                         canvasLabel.textContent = 'Stereogram Preview';
                     }
                 }
@@ -1355,7 +1483,6 @@
                 }
 
 
-                // Also, let's improve the processImageToDepth() method to ensure proper scaling:
                 async handleImageUpload(event) {
                     const file = event.target.files[0];
                     if (!file) return;
@@ -1365,18 +1492,23 @@
                     try {
                         const imageData = await this.loadImage(file);
 
-                        // Scale image to match canvas size for better preview
+                        // Process to depth map first
+                        const processedData = this.processImageToDepth(imageData);
+
+                        // Store original image data (for aspect ratio preservation)
+                        this.originalImageData = imageData;
+                        this.originalDepthData = processedData;
+
+                        // Scale to canvas size with aspect ratio preservation
                         const canvasWidth = this.canvas.depth.width;
                         const canvasHeight = this.canvas.depth.height;
-                        const scaledData = this.scaleImageData(imageData, canvasWidth, canvasHeight);
-
-                        const processedData = this.processImageToDepth(scaledData);
+                        const scaledData = this.scaleImageData(processedData, canvasWidth, canvasHeight, true);
 
                         // Store for preview
-                        this.previewImageData = processedData;
+                        this.previewImageData = scaledData;
 
                         // Display preview
-                        this.ctx.depth.putImageData(processedData, 0, 0);
+                        this.ctx.depth.putImageData(scaledData, 0, 0);
 
                         this.updateStatus('Image uploaded successfully');
                     } catch (error) {
@@ -1526,7 +1658,7 @@
                         // Load the image
                         const image = await this.loadImageFromUrl(`${this.presetImagePath}depth/${filename}`);
 
-                        // Convert to depth map
+                        // Convert to canvas and get image data
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
                         canvas.width = image.width;
@@ -1541,16 +1673,27 @@
                             this.invertDepthMap(processedData);
                         }
 
-                        // Store for preview
-                        this.previewImageData = processedData;
+                        // Store original data
+                        this.originalImageData = imageData;
+                        this.originalDepthData = processedData;
 
-                        // Display preview (scaled to current canvas size)
-                        const scaledData = this.scaleImageData(processedData,
-                            this.canvas.depth.width,
-                            this.canvas.depth.height);
+                        // Scale to canvas size with aspect ratio preservation
+                        const canvasWidth = this.canvas.depth.width;
+                        const canvasHeight = this.canvas.depth.height;
+                        const scaledData = this.scaleImageData(processedData, canvasWidth, canvasHeight, true);
+
+                        // Store for preview AND for adding as layer
+                        this.previewImageData = scaledData;
+                        this.presetImageFilename = filename;
+
+                        // Display preview
                         this.ctx.depth.putImageData(scaledData, 0, 0);
 
-                        this.updateStatus(`Depth preset "${filename}" loaded`);
+                        // Switch to "image" source type
+                        document.getElementById('depthSourceType').value = 'image';
+                        this.showSourceOptions('image');
+
+                        this.updateStatus(`Depth preset "${filename}" loaded. Click "Add as Layer" to use it.`);
                     } catch (error) {
                         console.error('Error loading depth preset:', error);
                         this.updateStatus(`Error loading depth preset: ${filename}`, true);
@@ -1615,7 +1758,7 @@
                         type: 'base',
                         opacity: 1,
                         visible: true,
-                        data: this.createEmptyDepthMap(width, height, 255) // White (far away)
+                        data: this.createEmptyDepthMap(width, height, 0) // White (far away)
                     };
 
                     this.layers = [baseLayer];
@@ -1631,15 +1774,28 @@
 
                     this.updateStatus('Adding image layer...');
 
-                    // IMPORTANT: Make a copy of the image data to avoid reference issues
-                    const canvas = document.createElement('canvas');
-                    const ctx = canvas.getContext('2d');
-                    canvas.width = this.previewImageData.width;
-                    canvas.height = this.previewImageData.height;
+                    // Get current canvas size
+                    const canvasWidth = this.canvas.depth.width;
+                    const canvasHeight = this.canvas.depth.height;
 
-                    // Create a fresh ImageData object
-                    const layerData = new ImageData(canvas.width, canvas.height);
-                    layerData.data.set(this.previewImageData.data);
+                    // Use the original depth data (not the preview) and scale it to current canvas size
+                    // If we don't have original depth data, use the preview data
+                    let layerData;
+
+                    if (this.originalDepthData) {
+                        // Scale original data to current canvas size with aspect ratio preservation
+                        layerData = this.scaleImageData(this.originalDepthData, canvasWidth, canvasHeight, true);
+                    } else {
+                        // Fallback to preview data (create a copy)
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = this.previewImageData.width;
+                        canvas.height = this.previewImageData.height;
+                        ctx.putImageData(this.previewImageData, 0, 0);
+
+                        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        layerData = this.scaleImageData(imgData, canvasWidth, canvasHeight, true);
+                    }
 
                     const layer = {
                         id: `image_${Date.now()}`,
@@ -1647,7 +1803,8 @@
                         type: 'image',
                         opacity: 1,
                         visible: true,
-                        data: layerData  // Use the copied data
+                        data: layerData,
+                        preserveAspectRatio: true // Flag to indicate aspect ratio should be preserved
                     };
 
                     this.layers.push(layer);
@@ -1863,7 +2020,8 @@
                     return imageData;
                 }
 
-                scaleImageData(sourceData, targetWidth, targetHeight) {
+                // Replace the existing scaleImageData method with this:
+                scaleImageData(sourceData, targetWidth, targetHeight, maintainAspectRatio = true) {
                     // Create source canvas
                     const sourceCanvas = document.createElement('canvas');
                     const sourceCtx = sourceCanvas.getContext('2d');
@@ -1877,12 +2035,45 @@
                     targetCanvas.width = targetWidth;
                     targetCanvas.height = targetHeight;
 
+                    // Clear target canvas with white background (far depth)
+                    // targetCtx.fillStyle = '#ffffff';
+                    targetCtx.fillStyle = '#000000';
+                    targetCtx.fillRect(0, 0, targetWidth, targetHeight);
+
+                    // Calculate scaling with aspect ratio preservation
+                    let drawWidth, drawHeight, offsetX, offsetY;
+
+                    if (maintainAspectRatio) {
+                        const sourceAspect = sourceData.width / sourceData.height;
+                        const targetAspect = targetWidth / targetHeight;
+
+                        if (sourceAspect > targetAspect) {
+                            // Source is wider - fit to width
+                            drawWidth = targetWidth;
+                            drawHeight = targetWidth / sourceAspect;
+                            offsetX = 0;
+                            offsetY = (targetHeight - drawHeight) / 2;
+                        } else {
+                            // Source is taller - fit to height
+                            drawHeight = targetHeight;
+                            drawWidth = targetHeight * sourceAspect;
+                            offsetX = (targetWidth - drawWidth) / 2;
+                            offsetY = 0;
+                        }
+                    } else {
+                        // Stretch to fit (original behavior)
+                        drawWidth = targetWidth;
+                        drawHeight = targetHeight;
+                        offsetX = 0;
+                        offsetY = 0;
+                    }
+
                     // Use smooth scaling
                     targetCtx.imageSmoothingEnabled = true;
                     targetCtx.imageSmoothingQuality = 'high';
 
-                    // Draw and scale
-                    targetCtx.drawImage(sourceCanvas, 0, 0, targetWidth, targetHeight);
+                    // Draw and scale with aspect ratio preservation
+                    targetCtx.drawImage(sourceCanvas, offsetX, offsetY, drawWidth, drawHeight);
 
                     return targetCtx.getImageData(0, 0, targetWidth, targetHeight);
                 }
@@ -2049,73 +2240,47 @@
                     const width = this.canvas.depth.width;
                     const height = this.canvas.depth.height;
 
-                    // Clear the canvas first
-                    this.ctx.depth.clearRect(0, 0, width, height);
+                    // Clear the canvas first with white background
+                    // this.ctx.depth.fillStyle = '#ffffff';
+                    this.ctx.depth.fillStyle = '#000000';
+                    this.ctx.depth.fillRect(0, 0, width, height);
 
-                    // If we don't have layers yet, initialize with white
+                    // If we don't have layers yet, just show white
                     if (this.layers.length === 0) {
-                        this.ctx.depth.fillStyle = '#ffffff';
-                        this.ctx.depth.fillRect(0, 0, width, height);
                         return;
                     }
 
-                    // Start with the base layer or white background
-                    let compositeData;
+                    // Create a composite image data
+                    const compositeData = new ImageData(width, height);
+                    const compositePixels = compositeData.data;
 
-                    if (this.layers.length > 0 && this.layers[0].visible && this.layers[0].opacity > 0) {
-                        const baseLayer = this.layers[0];
-                        // Scale base layer to current canvas size if needed
-                        if (baseLayer.data.width !== width || baseLayer.data.height !== height) {
-                            baseLayer.data = this.scaleImageData(baseLayer.data, width, height);
-                        }
-                        compositeData = new ImageData(width, height);
-                        compositeData.data.set(baseLayer.data.data);
-
-                        // Apply base layer opacity
-                        if (baseLayer.opacity < 1) {
-                            const data = compositeData.data;
-                            for (let i = 0; i < data.length; i += 4) {
-                                const alpha = baseLayer.opacity;
-                                data[i] = data[i] * alpha + 255 * (1 - alpha);
-                                data[i + 1] = data[i + 1] * alpha + 255 * (1 - alpha);
-                                data[i + 2] = data[i + 2] * alpha + 255 * (1 - alpha);
-                            }
-                        }
-                    } else {
-                        // Start with white background
-                        compositeData = new ImageData(width, height);
-                        const data = compositeData.data;
-                        for (let i = 0; i < data.length; i += 4) {
-                            data[i] = 255;
-                            data[i + 1] = 255;
-                            data[i + 2] = 255;
-                            data[i + 3] = 255;
-                        }
+                    // Start with white (far depth)
+                    for (let i = 0; i < compositePixels.length; i += 4) {
+                        compositePixels[i] = 255;
+                        compositePixels[i + 1] = 255;
+                        compositePixels[i + 2] = 255;
+                        compositePixels[i + 3] = 255;
                     }
 
-                    // Apply other layers
-                    for (let i = 1; i < this.layers.length; i++) {
+                    // Apply layers
+                    for (let i = 0; i < this.layers.length; i++) {
                         const layer = this.layers[i];
                         if (!layer.visible || layer.opacity <= 0) continue;
 
-                        // Scale layer to current canvas size
-                        let layerData = layer.data;
-                        if (layerData.width !== width || layerData.height !== height) {
-                            layerData = this.scaleImageData(layerData, width, height);
-                            // Update the layer data with scaled version
-                            layer.data = layerData;
-                        }
-
+                        // Get layer data (already scaled to canvas size with aspect ratio)
+                        const layerData = layer.data;
                         const layerPixels = layerData.data;
-                        const compositePixels = compositeData.data;
                         const alpha = layer.opacity;
 
+                        // Simple alpha blending
                         for (let j = 0; j < compositePixels.length; j += 4) {
                             if (alpha >= 1) {
+                                // Full opacity, replace
                                 compositePixels[j] = layerPixels[j];
                                 compositePixels[j + 1] = layerPixels[j + 1];
                                 compositePixels[j + 2] = layerPixels[j + 2];
                             } else {
+                                // Partial opacity, blend
                                 compositePixels[j] = compositePixels[j] * (1 - alpha) + layerPixels[j] * alpha;
                                 compositePixels[j + 1] = compositePixels[j + 1] * (1 - alpha) + layerPixels[j + 1] * alpha;
                                 compositePixels[j + 2] = compositePixels[j + 2] * (1 - alpha) + layerPixels[j + 2] * alpha;
@@ -2123,10 +2288,8 @@
                         }
                     }
 
-                    // Store the composite depth map
+                    // Store and display the composite depth map
                     this.currentDepthMap = compositeData;
-
-                    // Draw to canvas - this will fill the entire canvas
                     this.ctx.depth.putImageData(compositeData, 0, 0);
                 }
 
@@ -2337,14 +2500,18 @@
                     this.canvas.stereogram.width = width;
                     this.canvas.stereogram.height = height;
 
-                    // // Update CSS to maintain display size (optional, but helps with preview)
-                    // this.canvas.depth.style.width = '100%';
-                    // this.canvas.depth.style.height = 'auto';
-                    // this.canvas.stereogram.style.width = '100%';
-                    // this.canvas.stereogram.style.height = 'auto';
+                    // Resize all layers to new canvas size (with aspect ratio preservation)
+                    for (let i = 0; i < this.layers.length; i++) {
+                        const layer = this.layers[i];
 
-                    // Update all layers to new size
-                    this.updateAllLayersToCurrentSize();
+                        // For image layers, we need to re-scale from original if available
+                        if (layer.type === 'image' && layer.originalData) {
+                            layer.data = this.scaleImageData(layer.originalData, width, height, true);
+                        } else if (layer.data.width !== width || layer.data.height !== height) {
+                            // For other layers, scale existing data
+                            layer.data = this.scaleImageData(layer.data, width, height, layer.preserveAspectRatio || false);
+                        }
+                    }
 
                     // Update depth map preview
                     this.updateDepthMap();
