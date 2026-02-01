@@ -695,6 +695,12 @@
                 opacity: 1 !important;
             }
 
+            #textContent {
+                width: 100%;
+                resize: vertical;
+                max-height: 200px;
+            }
+
             .preset-image-item[data-filename*="texture"] .preset-image-preview {
                 background-size: cover;
             }
@@ -760,7 +766,7 @@
                         <div class="upload-icon">📁</div>
                         <p>Click to upload or drag & drop</p>
                         <p class="tip">PNG, JPG up to 5MB</p>
-                        <input type="file" id="imageUpload" accept=".jpg,.jpeg,.png" style="display: none;">
+                        <input type="file" id="imageUpload" accept=".jpg,.jpeg,.png">
                     </label>
 
                     <div class="control-group" style="display: none;">
@@ -843,7 +849,7 @@
 
                 <!-- Paint Options -->
                 <div id="paintOptions" class="source-options">
-                    <div class="canvas-container" style="height: 200px;">
+                    <div class="canvas-container">
                         <canvas id="paintCanvas" width="300" height="200"></canvas>
                     </div>
 
@@ -1740,8 +1746,11 @@
 
                     for (let i = 0; i < data.length; i += 4) {
                         data[i] = 255 - data[i];
-                        data[i + 1] = 255 - data[i];
-                        data[i + 2] = 255 - data[i];
+                        data[i + 1] = 255 - data[i + 1];
+                        data[i + 2] = 255 - data[i + 2];
+                        // data[i] = 255 - data[i];
+                        // data[i + 1] = 255 - data[i];
+                        // data[i + 2] = 255 - data[i];
                     }
 
                     return imageData;
